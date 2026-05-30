@@ -4,7 +4,7 @@ import { db } from "../firebase";
 
 const TOKEN_CA = "13SVgpzFcZf8vF6Tg1QV7vec82FdJrf4Kg2VEX4xpump";
 const PUMP_URL = "https://pump.fun/coin/" + TOKEN_CA;
-const X_URL    = "https://x.com/LastBuyerWins26";
+const X_URL    = "https://x.com/lbw_26";
 
 const short   = (a) => a ? `${a.slice(0,4)}...${a.slice(-4)}` : "—";
 const fmtSOL  = (n, d=4) => n == null ? "—" : Number(n).toFixed(d);
