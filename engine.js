@@ -20,18 +20,19 @@ const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestor
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const CREATOR_WALLET  = process.env.CREATOR_WALLET;
 const TOKEN_CA        = process.env.TOKEN_CA;
-const SOLANA_RPC      = process.env.SOLANA_RPC || "https://api.mainnet-beta.solana.com";
-const GAS_RESERVE_SOL = parseFloat(process.env.GAS_RESERVE_SOL  || "0.1");
-const TIMER_MS_MAX    = parseInt(process.env.TIMER_MS           || "60000");  // starting reset (60s)
-const TIMER_MS_MIN    = parseInt(process.env.TIMER_MS_MIN       || "10000");  // floor (10s)
-const TIMER_STEP_MS   = parseInt(process.env.TIMER_STEP_MS      || "5000");   // ms removed per minute
-const MAX_HOLDER_PCT  = parseFloat(process.env.MAX_HOLDER_PCT   || "5");
-const SPLIT_THRESHOLD = parseFloat(process.env.SPLIT_THRESHOLD  || "1.0");
-const POLL_MS         = 3000;
+const SOLANA_RPC          = process.env.SOLANA_RPC || "https://api.mainnet-beta.solana.com";
+const SOLANA_TRACKER_KEY  = process.env.SOLANA_TRACKER_API_KEY || "";
+const GAS_RESERVE_SOL     = parseFloat(process.env.GAS_RESERVE_SOL  || "0.1");
+const TIMER_MS_MAX        = parseInt(process.env.TIMER_MS           || "60000");  // starting reset (60s)
+const TIMER_MS_MIN        = parseInt(process.env.TIMER_MS_MIN       || "10000");  // floor (10s)
+const TIMER_STEP_MS       = parseInt(process.env.TIMER_STEP_MS      || "5000");   // ms removed per minute
+const MAX_HOLDER_PCT      = parseFloat(process.env.MAX_HOLDER_PCT   || "3.5");
+const SPLIT_THRESHOLD     = parseFloat(process.env.SPLIT_THRESHOLD  || "1.0");
+const POLL_MS             = 3000;
 
 // Market-cap tiers — configurable via env, defaults match user spec
 const MC_TIERS = [
-  { maxUSD: 35_000,   minBuySol: parseFloat(process.env.MIN_BUY_TIER1 || "0.2") },
+  { maxUSD: 35_000,   minBuySol: parseFloat(process.env.MIN_BUY_TIER1 || "0.1") },
   { maxUSD: 100_000,  minBuySol: parseFloat(process.env.MIN_BUY_TIER2 || "0.5") },
   { maxUSD: Infinity, minBuySol: parseFloat(process.env.MIN_BUY_TIER3 || "1.0") },
 ];
@@ -97,13 +98,35 @@ let currentMinBuySol = MC_TIERS[0].minBuySol;
 
 async function updateMarketCap() {
   try {
-    const res  = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_CA}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const pairs = data?.pairs;
-    if (!pairs?.length) return;
-    const pair = pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
-    const mc   = pair.marketCap || pair.fdv || 0;
+    let mc = 0;
+
+    // Solana Tracker (primary, if key provided)
+    if (SOLANA_TRACKER_KEY) {
+      try {
+        const res = await fetch(`https://data.solanatracker.io/tokens/${TOKEN_CA}`, {
+          headers: { "x-api-key": SOLANA_TRACKER_KEY },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const pool = data?.pools?.[0];
+          mc = pool?.marketCap?.usd || pool?.fdv?.usd || 0;
+        }
+      } catch {}
+    }
+
+    // DexScreener fallback
+    if (!mc) {
+      const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_CA}`);
+      if (res.ok) {
+        const data = await res.json();
+        const pairs = data?.pairs;
+        if (pairs?.length) {
+          const pair = pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+          mc = pair.marketCap || pair.fdv || 0;
+        }
+      }
+    }
+
     if (!mc) return;
 
     marketCapUSD = mc;

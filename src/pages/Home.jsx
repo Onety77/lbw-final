@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { doc, onSnapshot, collection, query, orderBy, limit } from "firebase/firestore";
 import { db } from "../firebase";
 
-const TOKEN_CA = "Exmff76TBNGYxob2WEJb28c12R6TjSvLv2zpbo6Xpump";
+const TOKEN_CA = "13SVgpzFcZf8vF6Tg1QV7vec82FdJrf4Kg2VEX4xpump";
 const PUMP_URL = "https://pump.fun/coin/" + TOKEN_CA;
 const X_URL    = "https://x.com/LastBuyerWins26";
 
@@ -82,7 +82,7 @@ function RulesModal({ onClose, minBuy }) {
   const rules = [
     {
       n:"01", title:"BUY THE TOKEN",
-      body:`Purchase the token on pump.fun. Your transaction must spend at least ◎${minBuy.toFixed(1)} SOL to qualify. The minimum buy increases automatically as the market cap grows — ◎0.2 at seed stage, ◎0.5 at growth, ◎1.0 at blue chip.`,
+      body:`Purchase the token on pump.fun. Your transaction must spend at least ◎${minBuy.toFixed(1)} SOL to qualify. The minimum buy increases automatically as the market cap grows — ◎0.1 at seed stage, ◎0.5 at growth, ◎1.0 at blue chip.`,
     },
     {
       n:"02", title:"TAKE THE LEAD",
@@ -140,7 +140,7 @@ function RulesModal({ onClose, minBuy }) {
         <div style={{ padding:"14px 18px", background:"rgba(255,32,32,0.04)", border:"1px solid rgba(255,32,32,0.14)", borderRadius:4 }}>
           <div style={{ fontFamily:"'Inter',sans-serif", fontSize:12, color:"var(--grey)", lineHeight:1.6 }}>
             <span style={{ color:"var(--red)", fontWeight:800, letterSpacing:1 }}>DISQUALIFIED:</span>{" "}
-            Wallets holding ≥5% of token supply are excluded from the leaderboard. This prevents whale manipulation.
+            Wallets holding ≥3.5% of token supply are excluded from the leaderboard. This prevents whale manipulation.
           </div>
         </div>
       </div>
@@ -373,7 +373,7 @@ export default function Home({ navigate }) {
   const totalPaid      = stats?.totalPaid ?? 0;
   const totalRounds    = stats?.totalRounds ?? 0;
   const biggestPot     = stats?.biggestPot ?? 0;
-  const minBuy         = stats?.currentMinBuySol ?? 0.2;
+  const minBuy         = stats?.currentMinBuySol ?? 0.1;
   const resetSec       = stats?.currentResetMs ? Math.round(stats.currentResetMs / 1000) : 60;
   const roundElapsedMs = stats?.roundElapsedMs ?? 0;
   const leader         = leaderboard[0];
@@ -549,13 +549,31 @@ export default function Home({ navigate }) {
           </div>
         </div>
 
-        {/* MC Tier */}
+        {/* MC & Tier indicator */}
         {mcUSD > 0 && (
-          <div style={{ zIndex:1, marginTop:28, animation:"fade-in 1.2s ease both" }}>
-            <div style={{ display:"inline-flex", alignItems:"center", gap:10, padding:"6px 16px", border:`1px solid ${mcTier.color}28`, borderRadius:24, background:`${mcTier.color}06` }}>
-              <div style={{ width:5, height:5, borderRadius:"50%", background:mcTier.color }}/>
-              <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:3, color:mcTier.color }}>{mcTier.label}</span>
-              <span style={{ fontFamily:"'Space Mono',monospace", fontSize:9, color:"var(--grey-dim)", marginLeft:2 }}>{fmtMC(mcUSD)} · min ◎{minBuy.toFixed(1)}</span>
+          <div style={{ zIndex:1, marginTop:28, animation:"fade-in 1.2s ease both", display:"flex", flexDirection:"column", alignItems:"center", gap:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ width:5, height:5, borderRadius:"50%", background:mcTier.color, boxShadow:`0 0 6px ${mcTier.color}` }}/>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, letterSpacing:3, color:"var(--grey-dim)" }}>MARKET CAP</span>
+              <span style={{ fontFamily:"'Space Mono',monospace", fontSize:15, fontWeight:700, color:"var(--white)" }}>{fmtMC(mcUSD)}</span>
+            </div>
+            <div style={{ display:"flex", gap:2 }}>
+              {[
+                { label:"SEED",      min:"0.1", active: mcUSD < 35_000,                       color:"#39FF14" },
+                { label:"GROWTH",    min:"0.5", active: mcUSD >= 35_000 && mcUSD < 100_000,   color:"#FFB800" },
+                { label:"BLUE CHIP", min:"1.0", active: mcUSD >= 100_000,                     color:"#FF2020" },
+              ].map(t => (
+                <div key={t.label} style={{
+                  padding: isMobile?"5px 10px":"5px 14px", borderRadius:3,
+                  background: t.active ? `${t.color}12` : "transparent",
+                  border:`1px solid ${t.active ? t.color+"55" : "rgba(255,255,255,0.06)"}`,
+                  display:"flex", flexDirection:"column", alignItems:"center", gap:3,
+                  transition:"all 0.4s",
+                }}>
+                  <span style={{ fontFamily:"'Inter',sans-serif", fontSize:7, fontWeight:700, letterSpacing:2, color: t.active ? t.color : "var(--grey-dim)" }}>{t.label}</span>
+                  <span style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color: t.active ? "var(--white)" : "#333", fontWeight: t.active ? 700 : 400 }}>◎{t.min}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
