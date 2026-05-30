@@ -300,6 +300,7 @@ export default function Home({ navigate }) {
     typeof Notification !== "undefined" && Notification.permission === "granted"
   );
   const [trackOpen, setTrackOpen] = useState(false);
+  const [blacklist, setBlacklist] = useState(new Set());
 
   const winAtRef       = useRef(null);
   const prevRoundRef   = useRef(null);
@@ -372,6 +373,14 @@ export default function Home({ navigate }) {
   }, [countdown, stats?.leaderboard, watchedWallet, notifGranted]);
 
   useEffect(() => {
+    return onSnapshot(doc(db, "lbw_config", "blacklist"), snap => {
+      if (!snap.exists()) return;
+      const wallets = snap.data().wallets || [];
+      setBlacklist(new Set(wallets.map(w => w.toLowerCase())));
+    });
+  }, []);
+
+  useEffect(() => {
     const fetchPrice = async () => {
       try {
         const r = await window.fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
@@ -389,8 +398,16 @@ export default function Home({ navigate }) {
     localStorage.setItem("lbw_watch", val);
   };
 
-  const leaderboard    = stats?.leaderboard || [];
   const currentPot     = stats?.currentPotSOL ?? null;
+  const leaderboard    = (stats?.leaderboard || [])
+    .filter(e => !blacklist.has(e.wallet.toLowerCase()))
+    .map((e, i, arr) => ({
+      ...e,
+      position: i + 1,
+      shareSol: i === 0
+        ? (currentPot ?? 0) * 0.5
+        : arr.length > 1 ? (currentPot ?? 0) * 0.5 / (arr.length - 1) : 0,
+    }));
   const totalPaid      = stats?.totalPaid ?? 0;
   const totalRounds    = stats?.totalRounds ?? 0;
   const biggestPot     = stats?.biggestPot ?? 0;

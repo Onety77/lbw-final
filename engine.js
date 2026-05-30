@@ -220,6 +220,17 @@ function addToLeaderboard(current, newEntry) {
   return [newEntry, ...without].slice(0, 5);
 }
 
+// ── BLACKLIST ─────────────────────────────────────────────────────────────────
+let blacklistedWallets = new Set();
+
+function watchBlacklist() {
+  db.doc("lbw_config/blacklist").onSnapshot(snap => {
+    const wallets = snap.exists ? (snap.data().wallets || []) : [];
+    blacklistedWallets = new Set(wallets.map(w => w.toLowerCase()));
+    log(`[Blacklist] ${blacklistedWallets.size} wallet(s) loaded`);
+  }, err => log(`[Blacklist] listener error: ${err.message}`));
+}
+
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let leaderboard    = [];
 let roundNumber    = 0;
@@ -301,6 +312,11 @@ async function onBuy(wallet, solAmount, sig, tsMs) {
   const now = Date.now();
   if (now - lastLeaderTime < LEADER_COOLDOWN) return;
   lastLeaderTime = now;
+
+  if (blacklistedWallets.has(wallet.toLowerCase())) {
+    log(`  [skip] ${wallet.slice(0,8)}... blacklisted`);
+    return;
+  }
 
   const { qualified, pct } = await isQualifiedBuyer(wallet);
   if (!qualified) {
@@ -554,6 +570,7 @@ db.doc("lbw_stats/global").get().then(snap => {
 
 const mintPubkey = new PublicKey(TOKEN_CA);
 startAutoClaimFees(connection, creatorKP, log);
+watchBlacklist();
 updateMarketCap();
 startNewRound();
 startWebSocket(mintPubkey);
