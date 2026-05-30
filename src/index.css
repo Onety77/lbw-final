@@ -26,6 +26,14 @@
   --grey:        #888;
   --grey-dim:    #444;
   --max-w:       1100px;
+
+  /* Pride Month palette */
+  --pride-red:    #FF3366;
+  --pride-orange: #FF8C00;
+  --pride-yellow: #FFD700;
+  --pride-green:  #39FF14;
+  --pride-blue:   #00B4FF;
+  --pride-purple: #BF5FFF;
 }
 
 html { scroll-behavior:smooth; }
@@ -37,11 +45,11 @@ body::before {
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
 }
 
-/* Green ambient glow */
+/* Pride ambient glow — cycles through the rainbow */
 body::after {
   content:''; position:fixed; top:-200px; left:50%; transform:translateX(-50%);
-  width:800px; height:500px; pointer-events:none; z-index:0;
-  background:radial-gradient(ellipse, rgba(57,255,20,0.04) 0%, transparent 70%);
+  width:900px; height:600px; pointer-events:none; z-index:0;
+  animation: pride-ambient 10s ease-in-out infinite;
 }
 
 /* ── Animations ── */
@@ -56,7 +64,55 @@ body::after {
   60%      { transform:translateX(-2px); }
   80%      { transform:translateX(2px); }
 }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* Pride-specific keyframes */
+@keyframes rainbow-shift {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes pride-ambient {
+  0%,100% { background: radial-gradient(ellipse, rgba(255,51,102,0.07) 0%, transparent 70%); }
+  16%     { background: radial-gradient(ellipse, rgba(255,140,0,0.07) 0%, transparent 70%); }
+  33%     { background: radial-gradient(ellipse, rgba(255,215,0,0.04) 0%, transparent 70%); }
+  50%     { background: radial-gradient(ellipse, rgba(57,255,20,0.05) 0%, transparent 70%); }
+  66%     { background: radial-gradient(ellipse, rgba(0,180,255,0.07) 0%, transparent 70%); }
+  83%     { background: radial-gradient(ellipse, rgba(191,95,255,0.07) 0%, transparent 70%); }
+}
+@keyframes pride-dot-cycle {
+  0%,100% { background:#FF3366; box-shadow:0 0 8px #FF3366; }
+  16%     { background:#FF8C00; box-shadow:0 0 8px #FF8C00; }
+  33%     { background:#FFD700; box-shadow:0 0 8px #FFD700; }
+  50%     { background:#39FF14; box-shadow:0 0 8px #39FF14; }
+  66%     { background:#00B4FF; box-shadow:0 0 8px #00B4FF; }
+  83%     { background:#BF5FFF; box-shadow:0 0 8px #BF5FFF; }
+}
+@keyframes pride-text-cycle {
+  0%,100% { color:#FF3366; }
+  16%     { color:#FF8C00; }
+  33%     { color:#FFD700; }
+  50%     { color:#39FF14; }
+  66%     { color:#00B4FF; }
+  83%     { color:#BF5FFF; }
+}
+@keyframes pulse-pride {
+  0%,100% { box-shadow:0 0 20px rgba(255,51,102,0.4),0 0 60px rgba(255,51,102,0.1); border-color:rgba(255,51,102,0.5); }
+  16%     { box-shadow:0 0 20px rgba(255,140,0,0.4),0 0 60px rgba(255,140,0,0.1); border-color:rgba(255,140,0,0.5); }
+  33%     { box-shadow:0 0 20px rgba(255,215,0,0.4),0 0 60px rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.5); }
+  50%     { box-shadow:0 0 20px rgba(57,255,20,0.4),0 0 60px rgba(57,255,20,0.1); border-color:rgba(57,255,20,0.5); }
+  66%     { box-shadow:0 0 20px rgba(0,180,255,0.4),0 0 60px rgba(0,180,255,0.1); border-color:rgba(0,180,255,0.5); }
+  83%     { box-shadow:0 0 20px rgba(191,95,255,0.4),0 0 60px rgba(191,95,255,0.1); border-color:rgba(191,95,255,0.5); }
+}
+@keyframes pride-pill-border {
+  0%,100% { border-color:rgba(255,51,102,0.45); box-shadow:0 0 18px rgba(255,51,102,0.2),0 4px 20px rgba(0,0,0,0.5); }
+  16%     { border-color:rgba(255,140,0,0.45);   box-shadow:0 0 18px rgba(255,140,0,0.2),0 4px 20px rgba(0,0,0,0.5); }
+  33%     { border-color:rgba(255,215,0,0.45);   box-shadow:0 0 18px rgba(255,215,0,0.2),0 4px 20px rgba(0,0,0,0.5); }
+  50%     { border-color:rgba(57,255,20,0.45);   box-shadow:0 0 18px rgba(57,255,20,0.2),0 4px 20px rgba(0,0,0,0.5); }
+  66%     { border-color:rgba(0,180,255,0.45);   box-shadow:0 0 18px rgba(0,180,255,0.2),0 4px 20px rgba(0,0,0,0.5); }
+  83%     { border-color:rgba(191,95,255,0.45);  box-shadow:0 0 18px rgba(191,95,255,0.2),0 4px 20px rgba(0,0,0,0.5); }
+}
+
+/* Standard layout/entry animations */
 @keyframes pulse-green {
   0%,100% { box-shadow:0 0 20px var(--green-glow); }
   50%      { box-shadow:0 0 60px var(--green-glow), 0 0 120px rgba(57,255,20,0.1); }
@@ -104,6 +160,16 @@ body::after {
   50%      { transform:translateX(-50%) translateY(8px); }
 }
 
+/* ── Pride utility classes ── */
+.rainbow-timer {
+  background: linear-gradient(90deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF,#FF3366);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow-shift 3s linear infinite;
+}
+
 /* ── Buttons ── */
 .btn {
   display:inline-flex; align-items:center; justify-content:center;
@@ -114,24 +180,38 @@ body::after {
   transition:all 0.15s ease;
 }
 .btn-green {
-  background:var(--green); color:#000;
-  box-shadow:0 0 20px rgba(57,255,20,0.2);
+  background: linear-gradient(90deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF,#FF3366);
+  background-size: 200% auto;
+  color: #000;
+  animation: rainbow-shift 3s linear infinite;
+  box-shadow: 0 0 28px rgba(191,95,255,0.25), 0 0 50px rgba(255,51,102,0.1);
 }
-.btn-green:hover { background:var(--green2); transform:translateY(-1px); box-shadow:0 4px 30px rgba(57,255,20,0.4); }
-.btn-red   { background:var(--red); color:#fff; }
+.btn-green:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 40px rgba(191,95,255,0.5), 0 0 80px rgba(255,51,102,0.25);
+  animation-duration: 1.5s;
+}
+.btn-red { background:var(--red); color:#fff; }
 .btn-red:hover { filter:brightness(1.1); transform:translateY(-1px); }
 .btn-outline {
   background:transparent; border:1px solid var(--border2);
   color:var(--grey);
 }
-.btn-outline:hover { border-color:var(--green); color:var(--green); }
+.btn-outline:hover {
+  border-color: var(--pride-purple);
+  color: var(--pride-purple);
+  box-shadow: 0 0 14px rgba(191,95,255,0.2);
+}
 
 /* ── Cards ── */
 .card { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:24px; }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width:3px; }
-::-webkit-scrollbar-thumb { background:var(--green3); border-radius:2px; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF);
+  border-radius:2px;
+}
 
 /* ── Responsive ── */
 @media (max-width:768px) { .hide-mobile { display:none!important; } }

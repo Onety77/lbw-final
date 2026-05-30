@@ -45,7 +45,6 @@ export default function FloatingTimer({ navigate }) {
     } catch {}
   };
 
-  // Firestore listener
   useEffect(() => {
     return onSnapshot(doc(db, "lbw_stats", "global"), snap => {
       if (!snap.exists()) return;
@@ -80,7 +79,6 @@ export default function FloatingTimer({ navigate }) {
     });
   }, []);
 
-  // Countdown interval + page title
   useEffect(() => {
     const id = setInterval(() => {
       if (!winAtRef.current) return;
@@ -117,9 +115,10 @@ export default function FloatingTimer({ navigate }) {
 
   if (!visible) return null;
 
-  const urgent  = countdown > 0 && countdown < 15_000;
-  const warning = countdown > 0 && countdown < 30_000 && !urgent;
-  const color   = urgent ? "#FF2020" : warning ? "#FFB800" : "#39FF14";
+  const urgent   = countdown > 0 && countdown < 15_000;
+  const warning  = countdown > 0 && countdown < 30_000 && !urgent;
+  const isNormal = !urgent && !warning;
+  const color    = urgent ? "#FF2020" : warning ? "#FFB800" : "#BF5FFF";
 
   return (
     <div style={{ position:"fixed", bottom:24, right:24, zIndex:999, display:"flex", flexDirection:"column", alignItems:"flex-end", gap:5 }}>
@@ -157,24 +156,44 @@ export default function FloatingTimer({ navigate }) {
         display:"flex", alignItems:"center", gap:10,
         padding:"10px 16px",
         background:"rgba(13,13,13,0.95)",
-        border:`1px solid ${color}44`,
+        border: isNormal ? "1px solid transparent" : `1px solid ${color}44`,
         borderRadius:40, backdropFilter:"blur(12px)",
         boxShadow: urgent
           ? `0 0 24px rgba(255,32,32,0.4), 0 4px 20px rgba(0,0,0,0.5)`
-          : `0 0 16px ${color}22, 0 4px 20px rgba(0,0,0,0.5)`,
-        animation: urgent ? "urgent-shake 0.4s ease infinite" : "fade-in 0.4s ease",
+          : undefined,
+        animation: urgent  ? "urgent-shake 0.4s ease infinite"
+                 : isNormal ? "pride-pill-border 6s linear infinite"
+                 : "fade-in 0.4s ease",
         transition:"border-color 0.3s, box-shadow 0.3s",
         userSelect:"none",
       }}>
-        <div style={{ width:8, height:8, borderRadius:"50%", background:color, boxShadow:`0 0 8px ${color}`, animation:"blink 1.5s ease infinite", flexShrink:0 }}/>
-
+        {/* Status dot */}
         <div style={{
-          fontFamily:"'Space Mono',monospace", fontSize:18, fontWeight:700,
-          color, letterSpacing:"-0.02em", lineHeight:1,
-          animation: urgent ? "countdown-pulse 0.5s ease infinite" : "none",
-        }}>
-          {fmtTime(countdown)}
-        </div>
+          width:8, height:8, borderRadius:"50%", flexShrink:0,
+          ...(isNormal ? {
+            animation:"pride-dot-cycle 3s linear infinite, blink 2s ease infinite",
+          } : {
+            background:color, boxShadow:`0 0 8px ${color}`, animation:"blink 1.5s ease infinite",
+          }),
+        }}/>
+
+        {/* Countdown text */}
+        {isNormal ? (
+          <div className="rainbow-timer" style={{
+            fontFamily:"'Space Mono',monospace", fontSize:18, fontWeight:700,
+            letterSpacing:"-0.02em", lineHeight:1,
+          }}>
+            {fmtTime(countdown)}
+          </div>
+        ) : (
+          <div style={{
+            fontFamily:"'Space Mono',monospace", fontSize:18, fontWeight:700,
+            color, letterSpacing:"-0.02em", lineHeight:1,
+            animation: urgent ? "countdown-pulse 0.5s ease infinite" : "none",
+          }}>
+            {fmtTime(countdown)}
+          </div>
+        )}
 
         <button
           onClick={()=>{ ensureAudioCtx(); setSoundOn(s=>!s); }}

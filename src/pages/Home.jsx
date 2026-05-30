@@ -27,12 +27,15 @@ const fmtMC = (usd) => {
   return `$${usd.toFixed(0)}`;
 };
 
+const RAINBOW = "linear-gradient(90deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF,#FF3366)";
+
 // ── Confetti ──────────────────────────────────────────────────────────────────
 function Confetti() {
-  const pieces = Array.from({ length: 50 }, (_, i) => ({
+  const PRIDE_COLORS = ["#FF3366","#FF8C00","#FFD700","#39FF14","#00B4FF","#BF5FFF","#FF69B4","#fff"];
+  const pieces = Array.from({ length: 60 }, (_, i) => ({
     id: i, x: Math.random() * 100, delay: Math.random() * 0.8,
     dur: 1.5 + Math.random() * 1.5,
-    color: ["#39FF14","#FFB800","#FF2020","#fff"][i % 4],
+    color: PRIDE_COLORS[i % PRIDE_COLORS.length],
     size: 4 + Math.random() * 7, rot: Math.random() * 360,
   }));
   return (
@@ -57,14 +60,14 @@ function BuyToast({ toasts }) {
       {toasts.slice(-2).map(t => (
         <div key={t.id} style={{
           padding:"7px 14px", background:"rgba(13,13,13,0.96)",
-          border:"1px solid rgba(57,255,20,0.3)", borderRadius:24,
+          border:"1px solid rgba(191,95,255,0.3)", borderRadius:24,
           backdropFilter:"blur(16px)", display:"flex", alignItems:"center", gap:10,
           animation:"toast-in 0.25s ease", boxShadow:"0 4px 20px rgba(0,0,0,0.5)",
           whiteSpace:"nowrap",
         }}>
-          <div style={{ width:5, height:5, borderRadius:"50%", background:"var(--green)", flexShrink:0 }}/>
+          <div style={{ width:5, height:5, borderRadius:"50%", flexShrink:0, animation:"pride-dot-cycle 3s linear infinite" }}/>
           <span style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--white)" }}>{short(t.wallet)}</span>
-          <span style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--green)", fontWeight:700 }}>◎{fmtSOL(t.amount, 3)}</span>
+          <span style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"#BF5FFF", fontWeight:700 }}>◎{fmtSOL(t.amount, 3)}</span>
         </div>
       ))}
     </div>
@@ -106,21 +109,25 @@ function RulesModal({ onClose, minBuy }) {
       padding:24, animation:"fade-in 0.2s ease",
     }}>
       <div onClick={e=>e.stopPropagation()} style={{
-        background:"#0a0a0a", border:"1px solid rgba(57,255,20,0.18)",
+        background:"#0a0a0a", border:"1px solid rgba(191,95,255,0.18)",
         borderRadius:8, padding:"40px 36px", maxWidth:540, width:"100%",
         maxHeight:"90vh", overflowY:"auto",
         animation:"modal-slide-up 0.28s cubic-bezier(0.16,1,0.3,1)",
-        boxShadow:"0 0 80px rgba(57,255,20,0.06), 0 32px 80px rgba(0,0,0,0.6)",
+        boxShadow:"0 0 80px rgba(191,95,255,0.08), 0 32px 80px rgba(0,0,0,0.6)",
         position:"relative",
       }}>
-        <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,rgba(57,255,20,0.4),transparent)" }}/>
+        {/* Rainbow top line */}
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:2,
+          background:RAINBOW, backgroundSize:"200% auto",
+          animation:"rainbow-shift 4s linear infinite", borderRadius:"8px 8px 0 0" }}/>
+
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:36 }}>
           <div>
-            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:5, color:"var(--green)", marginBottom:8 }}>THE RULES</div>
+            <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:5, marginBottom:8, animation:"pride-text-cycle 6s linear infinite" }}>THE RULES</div>
             <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:36, letterSpacing:"0.06em", color:"var(--white)", lineHeight:1 }}>HOW TO PLAY</div>
           </div>
           <button onClick={onClose} style={{ background:"none", border:"1px solid var(--border)", borderRadius:4, cursor:"pointer", color:"var(--grey)", width:36, height:36, fontSize:16, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.2s" }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor="var(--green)"; e.currentTarget.style.color="var(--green)"; }}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor="var(--pride-purple)"; e.currentTarget.style.color="var(--pride-purple)"; }}
             onMouseLeave={e=>{ e.currentTarget.style.borderColor="var(--border)"; e.currentTarget.style.color="var(--grey)"; }}
           >✕</button>
         </div>
@@ -128,7 +135,7 @@ function RulesModal({ onClose, minBuy }) {
         {rules.map((r, i) => (
           <div key={r.n} style={{ paddingBottom:28, marginBottom: i < rules.length-1 ? 28 : 24, borderBottom: i < rules.length-1 ? "1px solid var(--border)" : "none" }}>
             <div style={{ display:"flex", gap:18, alignItems:"flex-start" }}>
-              <div style={{ fontFamily:"'Space Mono',monospace", fontSize:30, color:"rgba(57,255,20,0.1)", fontWeight:700, lineHeight:1, flexShrink:0, width:38, userSelect:"none" }}>{r.n}</div>
+              <div style={{ fontFamily:"'Space Mono',monospace", fontSize:30, color:"rgba(191,95,255,0.12)", fontWeight:700, lineHeight:1, flexShrink:0, width:38, userSelect:"none" }}>{r.n}</div>
               <div>
                 <div style={{ fontFamily:"'Inter',sans-serif", fontSize:12, fontWeight:800, letterSpacing:"0.1em", color:"var(--white)", marginBottom:10 }}>{r.title}</div>
                 <div style={{ fontFamily:"'Inter',sans-serif", fontSize:13, color:"var(--grey)", lineHeight:1.75 }}>{r.body}</div>
@@ -173,14 +180,19 @@ function LeaderRow({ entry, isMobile, animateIn, isWatched }) {
       animation: animateIn ? "leader-enter 0.3s ease" : "none",
       transition:"background 0.3s",
     }}>
+      {/* Position circle */}
       <div style={{
         width: isMobile?24:28, height: isMobile?24:28, borderRadius:"50%",
         display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
-        background: isFirst ? "var(--green)" : "rgba(255,255,255,0.05)",
+        background: isFirst
+          ? RAINBOW
+          : "rgba(255,255,255,0.05)",
+        backgroundSize: isFirst ? "200% auto" : undefined,
+        animation: isFirst ? "rainbow-shift 3s linear infinite" : "none",
         fontFamily:"'Space Mono',monospace",
         fontSize: isFirst ? (isMobile?11:13) : (isMobile?9:10),
         fontWeight:700, color: isFirst ? "#000" : "var(--grey-dim)",
-        boxShadow: isFirst ? "0 0 14px rgba(57,255,20,0.45)" : "none",
+        boxShadow: isFirst ? "0 0 16px rgba(191,95,255,0.5), 0 0 32px rgba(255,51,102,0.25)" : "none",
       }}>
         {isFirst ? "★" : entry.position}
       </div>
@@ -188,23 +200,32 @@ function LeaderRow({ entry, isMobile, animateIn, isWatched }) {
       <div style={{ display:"flex", alignItems:"center", gap:6, minWidth:0 }}>
         <span style={{
           fontFamily:"'Space Mono',monospace", fontSize: isMobile?11:13,
-          color: isFirst?"var(--green)":isWatched?"var(--amber)":"var(--white)",
           fontWeight: isFirst||isWatched ? 700 : 400,
           overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap",
+          ...(isFirst ? {
+            background: RAINBOW,
+            backgroundSize:"200% auto",
+            WebkitBackgroundClip:"text",
+            WebkitTextFillColor:"transparent",
+            backgroundClip:"text",
+            animation:"rainbow-shift 3s linear infinite",
+          } : {
+            color: isWatched ? "var(--amber)" : "var(--white)",
+          }),
         }}>{short(entry.wallet)}</span>
         {isWatched && <span style={{ fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:700, color:"var(--amber)", flexShrink:0, letterSpacing:1 }}>YOU</span>}
-        <button onClick={copyWallet} title="Copy" style={{ background:"none", border:"none", cursor:"pointer", color:copied?"var(--green)":"var(--grey-dim)", fontSize:10, padding:"1px 3px", flexShrink:0, transition:"color 0.2s" }}>
+        <button onClick={copyWallet} title="Copy" style={{ background:"none", border:"none", cursor:"pointer", color:copied?"#BF5FFF":"var(--grey-dim)", fontSize:10, padding:"1px 3px", flexShrink:0, transition:"color 0.2s" }}>
           {copied ? "✓" : "⎘"}
         </button>
         <a href={`https://solscan.io/account/${entry.wallet}`} target="_blank" rel="noreferrer"
           style={{ color:"var(--grey-dim)", fontSize:10, textDecoration:"none", flexShrink:0, transition:"color 0.2s" }}
-          onMouseEnter={e=>e.currentTarget.style.color="var(--green)"}
+          onMouseEnter={e=>e.currentTarget.style.color="var(--pride-purple)"}
           onMouseLeave={e=>e.currentTarget.style.color="var(--grey-dim)"}
         >↗</a>
       </div>
 
       <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize: isMobile?10:11, color:"var(--grey)" }}>◎{fmtSOL(entry.amount)}</div>
-      {!isMobile && <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:13, color: isFirst?"var(--green)":"var(--white)", fontWeight:700 }}>◎{fmtSOL(entry.shareSol)}</div>}
+      {!isMobile && <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:13, color: isFirst?"#BF5FFF":"var(--white)", fontWeight:700 }}>◎{fmtSOL(entry.shareSol)}</div>}
       {!isMobile && <div style={{ textAlign:"right", fontFamily:"'Inter',sans-serif", fontSize:10, color:"var(--grey-dim)" }}>{entry.timestamp ? timeAgo(entry.timestamp.toMillis()) : ""}</div>}
     </div>
   );
@@ -380,7 +401,8 @@ export default function Home({ navigate }) {
   const potUSD         = currentPot != null && solPrice ? currentPot * solPrice : null;
   const urgent         = countdown > 0 && countdown < 15_000;
   const warning        = countdown > 0 && countdown < 30_000 && !urgent;
-  const timerColor     = urgent ? "var(--red)" : warning ? "var(--amber)" : "var(--green)";
+  const isNormal       = !urgent && !warning;
+  const timerColor     = urgent ? "var(--red)" : warning ? "var(--amber)" : "var(--pride-purple)";
   const statusLabel    = countdown <= 0 ? "PROCESSING..." : urgent ? "FINAL COUNTDOWN" : warning ? "ENDING SOON" : "LIVE ROUND";
 
   const elapsedMin   = Math.floor(roundElapsedMs / 60_000);
@@ -398,9 +420,16 @@ export default function Home({ navigate }) {
       <BuyToast toasts={toasts} />
       {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} minBuy={minBuy} />}
 
+      {/* Rainbow pride stripe — fixed above everything */}
+      <div style={{
+        position:"fixed", top:0, left:0, right:0, height:4, zIndex:300,
+        background:RAINBOW, backgroundSize:"200% auto",
+        animation:"rainbow-shift 4s linear infinite",
+      }}/>
+
       {/* HEADER */}
       <header style={{
-        position:"fixed", top:0, left:0, right:0, zIndex:200,
+        position:"fixed", top:4, left:0, right:0, zIndex:200,
         display:"flex", alignItems:"center", justifyContent:"space-between",
         padding: isMobile?"12px 16px":"14px 32px",
         background:"rgba(6,6,6,0.94)", borderBottom:"1px solid var(--border)",
@@ -413,19 +442,20 @@ export default function Home({ navigate }) {
             {!isMobile && <div style={{ fontFamily:"'Space Mono',monospace", fontSize:7, color:"var(--grey)", letterSpacing:3 }}>ON SOLANA</div>}
           </div>
         </div>
-        <nav style={{ display:"flex", alignItems:"center", gap: isMobile?10:20 }}>
+        <nav style={{ display:"flex", alignItems:"center", gap: isMobile?10:16 }}>
           {!isMobile && [["HOME",()=>navigate("home")],["HISTORY",()=>navigate("history")]].map(([l,fn]) => (
             <button key={l} onClick={fn} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:3, color:"var(--grey)", transition:"color 0.2s" }}
               onMouseEnter={e=>e.currentTarget.style.color="var(--white)"}
               onMouseLeave={e=>e.currentTarget.style.color="var(--grey)"}
             >{l}</button>
           ))}
+
           <button onClick={()=>setRulesOpen(true)} style={{
             background:"none", border:"1px solid var(--border)", borderRadius:20,
             cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700,
             letterSpacing:2, color:"var(--grey)", padding:"5px 13px", transition:"all 0.2s",
           }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor="var(--green)"; e.currentTarget.style.color="var(--green)"; }}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor="var(--pride-purple)"; e.currentTarget.style.color="var(--pride-purple)"; }}
             onMouseLeave={e=>{ e.currentTarget.style.borderColor="var(--border)"; e.currentTarget.style.color="var(--grey)"; }}
           >? RULES</button>
           <a href={X_URL} target="_blank" rel="noreferrer" style={{ fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:2, color:"var(--grey)", textDecoration:"none", transition:"color 0.2s" }}
@@ -441,7 +471,7 @@ export default function Home({ navigate }) {
       </header>
 
       {menuOpen && (
-        <div style={{ position:"fixed", top:isMobile?52:61, left:0, right:0, background:"var(--bg2)", borderBottom:"1px solid var(--border)", zIndex:199, padding:"12px 16px 20px", animation:"slide-down 0.2s ease" }}>
+        <div style={{ position:"fixed", top:isMobile?56:65, left:0, right:0, background:"var(--bg2)", borderBottom:"1px solid var(--border)", zIndex:199, padding:"12px 16px 20px", animation:"slide-down 0.2s ease" }}>
           {[["HOME",()=>{navigate("home");setMenuOpen(false);}],["HISTORY",()=>{navigate("history");setMenuOpen(false);}]].map(([l,fn]) => (
             <button key={l} onClick={fn} style={{ display:"block", width:"100%", background:"none", border:"none", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:700, letterSpacing:3, color:"var(--grey)", textAlign:"left", padding:"13px 0", borderBottom:"1px solid var(--border)" }}>{l}</button>
           ))}
@@ -452,46 +482,80 @@ export default function Home({ navigate }) {
       <section style={{
         minHeight:"100vh", display:"flex", flexDirection:"column",
         alignItems:"center", justifyContent:"center",
-        padding: isMobile?"88px 24px 64px":"100px 32px 80px",
+        padding: isMobile?"92px 24px 64px":"104px 32px 80px",
         position:"relative", textAlign:"center", overflow:"hidden",
       }}>
-        {/* Grid bg */}
+        {/* Subtle grid */}
         <div style={{
           position:"absolute", inset:0, pointerEvents:"none",
-          backgroundImage:`linear-gradient(rgba(57,255,20,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(57,255,20,0.025) 1px, transparent 1px)`,
+          backgroundImage:`linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)`,
           backgroundSize:"64px 64px",
           maskImage:"radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 100%)",
           WebkitMaskImage:"radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 100%)",
         }}/>
-        {/* Glow */}
+
+        {/* Pride hero glow */}
         <div style={{
           position:"absolute", top:"36%", left:"50%", transform:"translate(-50%,-50%)",
           width:720, height:520, pointerEvents:"none", zIndex:0,
-          background:`radial-gradient(ellipse, ${urgent?"rgba(255,32,32,0.1)":warning?"rgba(255,184,0,0.07)":"rgba(57,255,20,0.07)"} 0%, transparent 65%)`,
-          transition:"background 1.5s",
+          ...(isNormal ? {
+            animation:"pride-ambient 8s ease-in-out infinite",
+          } : {
+            background:`radial-gradient(ellipse, ${urgent?"rgba(255,32,32,0.1)":"rgba(255,184,0,0.07)"} 0%, transparent 65%)`,
+            transition:"background 1.5s",
+          }),
         }}/>
 
-        {/* Status */}
-        <div style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"6px 16px", border:`1px solid ${timerColor}30`, borderRadius:24, background:`${timerColor}08`, marginBottom:28, zIndex:1, animation:"fade-in 0.5s ease both" }}>
-          <div style={{ width:6, height:6, borderRadius:"50%", background:timerColor, boxShadow:`0 0 8px ${timerColor}`, animation:"blink 1.5s ease infinite" }}/>
-          <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:"0.4em", color:timerColor }}>{statusLabel}</span>
+        {/* Status pill */}
+        <div style={{
+          display:"inline-flex", alignItems:"center", gap:8, padding:"6px 16px",
+          border: isNormal ? "1px solid rgba(191,95,255,0.3)" : `1px solid ${timerColor}30`,
+          borderRadius:24,
+          background: isNormal ? "rgba(191,95,255,0.07)" : `${timerColor}08`,
+          marginBottom:28, zIndex:1, animation:"fade-in 0.5s ease both",
+          ...(isNormal && { animation:"pulse-pride 6s linear infinite" }),
+        }}>
+          <div style={{
+            width:6, height:6, borderRadius:"50%", flexShrink:0,
+            ...(isNormal ? {
+              animation:"pride-dot-cycle 3s linear infinite, blink 2s ease infinite",
+            } : {
+              background:timerColor, boxShadow:`0 0 8px ${timerColor}`,
+              animation:"blink 1.5s ease infinite",
+            }),
+          }}/>
+          <span style={{
+            fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:"0.4em",
+            ...(isNormal ? { animation:"pride-text-cycle 6s linear infinite" } : { color:timerColor }),
+          }}>{statusLabel}</span>
         </div>
 
         {/* TIMER */}
-        <div style={{
-          fontFamily:"'Space Mono',monospace",
-          fontSize: isMobile?"clamp(80px,20vw,130px)":"clamp(100px,13vw,172px)",
-          fontWeight:700, lineHeight:0.88, letterSpacing:"-0.04em",
-          color:timerColor, zIndex:1,
-          animation: urgent ? "urgent-shake 0.35s ease infinite, countdown-pulse 0.5s ease infinite"
-                   : warning ? "countdown-pulse 2s ease infinite" : "fade-in 0.7s ease both",
-          textShadow: urgent ? `0 0 80px ${timerColor}, 0 0 160px ${timerColor}44`
-                    : warning ? `0 0 40px ${timerColor}88` : `0 0 30px ${timerColor}33`,
-          transition:"color 0.5s, text-shadow 0.5s",
-          marginBottom:18,
-        }}>
-          {fmtTime(countdown)}
-        </div>
+        {isNormal ? (
+          <div className="rainbow-timer" style={{
+            fontFamily:"'Space Mono',monospace",
+            fontSize: isMobile?"clamp(80px,20vw,130px)":"clamp(100px,13vw,172px)",
+            fontWeight:700, lineHeight:0.88, letterSpacing:"-0.04em",
+            zIndex:1, marginBottom:18,
+          }}>
+            {fmtTime(countdown)}
+          </div>
+        ) : (
+          <div style={{
+            fontFamily:"'Space Mono',monospace",
+            fontSize: isMobile?"clamp(80px,20vw,130px)":"clamp(100px,13vw,172px)",
+            fontWeight:700, lineHeight:0.88, letterSpacing:"-0.04em",
+            color:timerColor, zIndex:1,
+            animation: urgent ? "urgent-shake 0.35s ease infinite, countdown-pulse 0.5s ease infinite"
+                     : "countdown-pulse 2s ease infinite",
+            textShadow: urgent ? `0 0 80px ${timerColor}, 0 0 160px ${timerColor}44`
+                      : `0 0 40px ${timerColor}88`,
+            transition:"color 0.5s, text-shadow 0.5s",
+            marginBottom:18,
+          }}>
+            {fmtTime(countdown)}
+          </div>
+        )}
 
         {/* Subtitle + shrink info */}
         <div style={{ zIndex:1, marginBottom:10, animation:"fade-in 0.8s ease both" }}>
@@ -506,8 +570,8 @@ export default function Home({ navigate }) {
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ width:1, height:44, background:"linear-gradient(transparent,var(--border),transparent)", margin:"22px auto", zIndex:1, animation:"fade-in 0.9s ease both" }}/>
+        {/* Rainbow vertical divider */}
+        <div style={{ width:1, height:44, background:"linear-gradient(180deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF)", margin:"22px auto", zIndex:1, animation:"fade-in 0.9s ease both" }}/>
 
         {/* POT */}
         <div style={{ zIndex:1, marginBottom:32, animation:"fade-in 1s ease both" }}>
@@ -520,7 +584,7 @@ export default function Home({ navigate }) {
             ◎ {fmtSOL(currentPot, 4)}
           </div>
           <div style={{ fontFamily:"'Inter',sans-serif", fontSize:13, color:"var(--grey)" }}>
-            {potUSD != null && <span style={{ color:"rgba(57,255,20,0.55)", marginRight:12 }}>≈ ${potUSD.toFixed(0)}</span>}
+            {potUSD != null && <span style={{ color:"rgba(191,95,255,0.7)", marginRight:12 }}>≈ ${potUSD.toFixed(0)}</span>}
             {leaderboard.length > 0 && <span>{leaderboard.length} wallet{leaderboard.length!==1?"s":""} competing</span>}
           </div>
         </div>
@@ -528,18 +592,13 @@ export default function Home({ navigate }) {
         {/* BUY CTA */}
         <div style={{ zIndex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:10, animation:"fade-in 1.1s ease both" }}>
           <a href={PUMP_URL} target="_blank" rel="noreferrer">
-            <button style={{
-              display:"inline-flex", alignItems:"center", gap:10,
-              background:"var(--green)", color:"#000",
-              border:"none", borderRadius:4, cursor:"pointer",
-              fontFamily:"'Inter',sans-serif", fontSize: isMobile?14:15,
-              fontWeight:800, letterSpacing:"0.1em",
+            <button className="btn btn-green" style={{
+              fontSize: isMobile?14:15,
               padding: isMobile?"16px 36px":"18px 52px",
-              boxShadow:"0 0 40px rgba(57,255,20,0.28), 0 6px 24px rgba(0,0,0,0.4)",
-              transition:"all 0.2s",
+              letterSpacing:"0.1em",
             }}
-              onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 0 70px rgba(57,255,20,0.5), 0 10px 36px rgba(0,0,0,0.5)"; }}
-              onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 0 40px rgba(57,255,20,0.28), 0 6px 24px rgba(0,0,0,0.4)"; }}
+              onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 4px 40px rgba(191,95,255,0.55),0 0 80px rgba(255,51,102,0.25)"; }}
+              onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; e.currentTarget.style.boxShadow="0 0 28px rgba(191,95,255,0.25),0 0 50px rgba(255,51,102,0.1)"; }}
             >
               BUY ON PUMP.FUN <span style={{ fontSize:15 }}>↗</span>
             </button>
@@ -579,8 +638,8 @@ export default function Home({ navigate }) {
         )}
 
         {/* Scroll cue */}
-        <div style={{ position:"absolute", bottom:28, left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:6, animation:"bounce-down 2.5s ease infinite", opacity:0.35 }}>
-          <div style={{ width:1, height:28, background:"linear-gradient(var(--green),transparent)" }}/>
+        <div style={{ position:"absolute", bottom:28, left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:6, animation:"bounce-down 2.5s ease infinite", opacity:0.4 }}>
+          <div style={{ width:1, height:28, background:"linear-gradient(#BF5FFF,transparent)" }}/>
           <div style={{ fontFamily:"'Inter',sans-serif", fontSize:8, letterSpacing:3, color:"var(--grey-dim)" }}>SCROLL</div>
         </div>
       </section>
@@ -589,7 +648,7 @@ export default function Home({ navigate }) {
       <section style={{ padding: isMobile?"48px 16px 56px":"64px 32px 72px", maxWidth:880, margin:"0 auto", width:"100%" }}>
         <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:20 }}>
           <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-            <div style={{ width:7, height:7, borderRadius:"50%", background:"var(--green)", boxShadow:"0 0 8px var(--green)", animation:"blink 1.5s ease infinite" }}/>
+            <div style={{ width:7, height:7, borderRadius:"50%", animation:"pride-dot-cycle 3s linear infinite, blink 2s ease infinite" }}/>
             <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:5, color:"var(--white)" }}>LIVE LEADERBOARD</span>
           </div>
           <div style={{ flex:1, height:1, background:"linear-gradient(90deg,var(--border),transparent)" }}/>
@@ -600,22 +659,29 @@ export default function Home({ navigate }) {
         {leader && (
           <div style={{
             padding: isMobile?"16px 20px":"20px 28px",
-            border:`1px solid ${urgent?"var(--red)":"var(--green)"}`,
+            border:`1px solid ${urgent?"var(--red)":"rgba(191,95,255,0.5)"}`,
             borderRadius:6, marginBottom:8,
-            background: urgent?"rgba(255,32,32,0.04)":"rgba(57,255,20,0.025)",
-            animation: urgent?"pulse-red 1.5s ease-in-out infinite":"pulse-green 3s ease-in-out infinite",
+            background: urgent?"rgba(255,32,32,0.04)":"rgba(191,95,255,0.03)",
+            animation: urgent?"pulse-red 1.5s ease-in-out infinite":"pulse-pride 6s linear infinite",
             display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap",
           }}>
             <div>
-              <div style={{ fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:700, letterSpacing:4, color: urgent?"var(--red)":"var(--green)", marginBottom:7 }}>★ CURRENT LEADER — WINS 50%</div>
+              <div style={{
+                fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:700, letterSpacing:4, marginBottom:7,
+                ...(urgent ? { color:"var(--red)" } : { animation:"pride-text-cycle 6s linear infinite" }),
+              }}>★ CURRENT LEADER — WINS 50%</div>
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <span style={{ fontFamily:"'Space Mono',monospace", fontSize: isMobile?13:15, color:"var(--white)", fontWeight:700 }}>{short(leader.wallet)}</span>
                 <button onClick={()=>navigator.clipboard.writeText(leader.wallet)} style={{ background:"none", border:"none", cursor:"pointer", color:"var(--grey-dim)", fontSize:10, padding:"1px 3px" }}>⎘</button>
-                <a href={`https://solscan.io/account/${leader.wallet}`} target="_blank" rel="noreferrer" style={{ color:"var(--grey-dim)", fontSize:11, textDecoration:"none" }}>↗</a>
+                <a href={`https://solscan.io/account/${leader.wallet}`} target="_blank" rel="noreferrer"
+                  style={{ color:"var(--grey-dim)", fontSize:11, textDecoration:"none", transition:"color 0.2s" }}
+                  onMouseEnter={e=>e.currentTarget.style.color="var(--pride-purple)"}
+                  onMouseLeave={e=>e.currentTarget.style.color="var(--grey-dim)"}
+                >↗</a>
               </div>
             </div>
             <div style={{ textAlign:"right" }}>
-              <div style={{ fontFamily:"'Space Mono',monospace", fontSize: isMobile?20:26, color:"var(--green)", fontWeight:700, lineHeight:1 }}>◎ {fmtSOL(leader.shareSol)}</div>
+              <div style={{ fontFamily:"'Space Mono',monospace", fontSize: isMobile?20:26, color: urgent?"var(--red)":"#BF5FFF", fontWeight:700, lineHeight:1 }}>◎ {fmtSOL(leader.shareSol)}</div>
               <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey)", marginTop:5 }}>if timer expires now</div>
             </div>
           </div>
@@ -626,7 +692,7 @@ export default function Home({ navigate }) {
         {leaderboard.length > 1 && (
           <div style={{ marginTop:8, padding:"10px 18px", border:"1px solid var(--border)", borderRadius:4, background:"var(--bg2)", display:"flex", alignItems:"center", gap:24, flexWrap:"wrap" }}>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:6, height:6, borderRadius:"50%", background:"var(--green)" }}/>
+              <div style={{ width:6, height:6, borderRadius:"50%", animation:"pride-dot-cycle 3s linear infinite" }}/>
               <span style={{ fontFamily:"'Space Mono',monospace", fontSize:9, color:"var(--grey)" }}>#1 gets 50% → ◎{fmtSOL(leaderboard[0]?.shareSol)}</span>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -639,7 +705,7 @@ export default function Home({ navigate }) {
         {/* Track wallet */}
         <div style={{ marginTop:16 }}>
           <button onClick={()=>setTrackOpen(o=>!o)} style={{ background:"none", border:"1px solid var(--border)", borderRadius:3, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:3, color:"var(--grey)", padding:"7px 14px", transition:"all 0.2s" }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor="var(--green)"; e.currentTarget.style.color="var(--green)"; }}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor="var(--pride-purple)"; e.currentTarget.style.color="var(--pride-purple)"; }}
             onMouseLeave={e=>{ e.currentTarget.style.borderColor="var(--border)"; e.currentTarget.style.color="var(--grey)"; }}
           >{trackOpen?"▲ HIDE":"🔔 TRACK MY WALLET"}</button>
 
@@ -649,7 +715,7 @@ export default function Home({ navigate }) {
               <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                 <input placeholder="Paste your wallet address..." value={trackInput} onChange={e=>setTrackInput(e.target.value)}
                   style={{ flex:1, minWidth:200, background:"rgba(255,255,255,0.03)", border:"1px solid var(--border)", borderRadius:3, padding:"9px 12px", fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--white)", outline:"none" }}
-                  onFocus={e=>e.currentTarget.style.borderColor="var(--green)"}
+                  onFocus={e=>e.currentTarget.style.borderColor="var(--pride-purple)"}
                   onBlur={e=>e.currentTarget.style.borderColor="var(--border)"}
                 />
                 <button onClick={()=>{ saveWatchedWallet(trackInput.trim()); urgentNotifRef.current=false; }} className="btn btn-green" style={{ fontSize:10, padding:"9px 18px" }}>SAVE</button>
@@ -657,7 +723,7 @@ export default function Home({ navigate }) {
               </div>
               {watchedWallet && (
                 <div style={{ marginTop:8, display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-                  <span style={{ fontFamily:"'Space Mono',monospace", fontSize:9, color:"var(--green)" }}>✓ Tracking {short(watchedWallet)}</span>
+                  <span style={{ fontFamily:"'Space Mono',monospace", fontSize:9, color:"#BF5FFF" }}>✓ Tracking {short(watchedWallet)}</span>
                   {!notifGranted ? (
                     <button onClick={async()=>{ const p=await Notification.requestPermission(); setNotifGranted(p==="granted"); }} style={{ background:"rgba(255,184,0,0.08)", border:"1px solid rgba(255,184,0,0.25)", borderRadius:3, cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:2, color:"var(--amber)", padding:"4px 10px" }}>ENABLE ALERTS 🔔</button>
                   ) : (
@@ -671,7 +737,7 @@ export default function Home({ navigate }) {
       </section>
 
       {/* STATS STRIP */}
-      <div style={{ borderTop:"1px solid var(--border)", borderBottom:"1px solid var(--border)", background:"rgba(57,255,20,0.008)" }}>
+      <div style={{ borderTop:"1px solid var(--border)", borderBottom:"1px solid var(--border)", background:"rgba(191,95,255,0.008)" }}>
         <div style={{ maxWidth:880, margin:"0 auto", display:"grid", gridTemplateColumns: isMobile?"repeat(2,1fr)":"repeat(4,1fr)" }}>
           {[
             { label:"TOTAL PAID",    value:`◎ ${fmtSOL(totalPaid)}` },
@@ -705,14 +771,18 @@ export default function Home({ navigate }) {
                     <div>
                       <div style={{ display:"flex", alignItems:"center", gap:6 }}>
                         <span style={{ fontFamily:"'Space Mono',monospace", fontSize:11, color:"var(--white)" }}>{short(top?.wallet)}</span>
-                        {top?.wallet && <a href={`https://solscan.io/account/${top.wallet}`} target="_blank" rel="noreferrer" style={{ color:"var(--grey-dim)", fontSize:10, textDecoration:"none" }}>↗</a>}
+                        {top?.wallet && <a href={`https://solscan.io/account/${top.wallet}`} target="_blank" rel="noreferrer"
+                          style={{ color:"var(--grey-dim)", fontSize:10, textDecoration:"none", transition:"color 0.2s" }}
+                          onMouseEnter={e=>e.currentTarget.style.color="var(--pride-purple)"}
+                          onMouseLeave={e=>e.currentTarget.style.color="var(--grey-dim)"}
+                        >↗</a>}
                         {w.numWinners>1 && <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey)" }}>+{w.numWinners-1} more</span>}
                       </div>
                       <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", marginTop:2 }}>{w.timestamp?timeAgo(w.timestamp.toMillis()):""}</div>
                     </div>
                   </div>
                   <div style={{ textAlign:"right" }}>
-                    <div style={{ fontFamily:"'Space Mono',monospace", fontSize:13, color:"var(--green)", fontWeight:700 }}>◎ {fmtSOL(w.pot)}</div>
+                    <div style={{ fontFamily:"'Space Mono',monospace", fontSize:13, color:"#BF5FFF", fontWeight:700 }}>◎ {fmtSOL(w.pot)}</div>
                     <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", marginTop:2 }}>{w.numWinners} winner{w.numWinners>1?"s":""}</div>
                   </div>
                 </div>
@@ -728,7 +798,10 @@ export default function Home({ navigate }) {
       {/* CONTRACT */}
       <section style={{ padding: isMobile?"0 16px 56px":"0 32px 72px", maxWidth:880, margin:"0 auto", width:"100%" }}>
         <div style={{ border:"1px solid var(--border)", borderRadius:6, padding: isMobile?"20px":"28px", background:"var(--bg2)", position:"relative", overflow:"hidden" }}>
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:1, background:"linear-gradient(90deg,transparent,rgba(57,255,20,0.3),transparent)" }}/>
+          {/* Rainbow top accent */}
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:1,
+            background:RAINBOW, backgroundSize:"200% auto",
+            animation:"rainbow-shift 4s linear infinite" }}/>
           <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:4, color:"var(--grey)", marginBottom:10 }}>CONTRACT ADDRESS</div>
           <div style={{ fontFamily:"'Space Mono',monospace", fontSize: isMobile?9:11, color: isLive?"var(--white)":"var(--grey)", wordBreak:"break-all", lineHeight:1.7, marginBottom:16, fontStyle: isLive?"normal":"italic" }}>
             {isLive ? TOKEN_CA : "— contract address at launch —"}
@@ -743,7 +816,9 @@ export default function Home({ navigate }) {
 
       {/* FOOTER */}
       <footer style={{ borderTop:"1px solid var(--border)", padding:"18px 32px", display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto", flexWrap:"wrap", gap:12 }}>
-        <div style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--grey-dim)" }}>LAST BUYER WINS · SOLANA</div>
+        <div style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--grey-dim)" }}>
+          LAST BUYER WINS · SOLANA
+        </div>
         {!isMobile && <div style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:"var(--grey-dim)", fontStyle:"italic" }}>Buy last. Win big.</div>}
         <a href={X_URL} target="_blank" rel="noreferrer" style={{ color:"var(--grey-dim)", textDecoration:"none", fontSize:10, letterSpacing:2 }}>𝕏</a>
       </footer>

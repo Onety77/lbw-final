@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 
+const RAINBOW = "linear-gradient(90deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF,#FF3366)";
+
 const short  = (a) => a ? `${a.slice(0,4)}...${a.slice(-4)}` : "—";
 const fmtSOL = (n, d=4) => (n == null ? "—" : Number(n).toFixed(d));
 const fmtDate = (ts) => {
@@ -30,7 +32,7 @@ function CopyWalletBtn({ wallet }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <button onClick={copy} title="Copy wallet" style={{ background:"none", border:"none", cursor:"pointer", color:copied?"var(--green)":"var(--grey-dim)", fontSize:10, padding:"1px 3px", transition:"color 0.2s" }}>
+    <button onClick={copy} title="Copy wallet" style={{ background:"none", border:"none", cursor:"pointer", color:copied?"#BF5FFF":"var(--grey-dim)", fontSize:10, padding:"1px 3px", transition:"color 0.2s" }}>
       {copied ? "✓" : "⎘"}
     </button>
   );
@@ -43,7 +45,7 @@ function WalletCell({ wallet, fontSize=11, color="var(--white)" }) {
       <CopyWalletBtn wallet={wallet}/>
       <a href={`https://solscan.io/account/${wallet}`} target="_blank" rel="noreferrer"
         style={{ color:"var(--grey-dim)", fontSize:10, textDecoration:"none", transition:"color 0.2s" }}
-        onMouseEnter={e=>e.currentTarget.style.color="var(--green)"}
+        onMouseEnter={e=>e.currentTarget.style.color="var(--pride-purple)"}
         onMouseLeave={e=>e.currentTarget.style.color="var(--grey-dim)"}
       >↗</a>
     </div>
@@ -58,7 +60,7 @@ export default function History({ navigate }) {
   const [expanded, setExpanded] = useState(null);
   const [loading,  setLoading]  = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("rounds"); // "rounds" | "halloffame"
+  const [activeTab, setActiveTab] = useState("rounds");
 
   useEffect(() => {
     const q = query(collection(db, "lbw_history"), orderBy("timestamp","desc"), limit(100));
@@ -68,7 +70,6 @@ export default function History({ navigate }) {
     });
   }, []);
 
-  // Aggregate Hall of Fame from rounds data
   const hallOfFame = useMemo(() => {
     const map = {};
     rounds.forEach(round => {
@@ -92,25 +93,33 @@ export default function History({ navigate }) {
   const tabStyle = (tab) => ({
     background:"none", border:"none", cursor:"pointer",
     fontFamily:"'Inter',sans-serif", fontSize:10, fontWeight:700, letterSpacing:3,
-    color: activeTab === tab ? "var(--green)" : "var(--grey)",
+    color: activeTab === tab ? "#BF5FFF" : "var(--grey)",
     padding:"10px 18px",
-    borderBottom: activeTab === tab ? "2px solid var(--green)" : "2px solid transparent",
+    borderBottom: activeTab === tab ? "2px solid #BF5FFF" : "2px solid transparent",
     transition:"all 0.2s",
   });
 
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", position:"relative", zIndex:1 }}>
 
+      {/* Rainbow pride stripe */}
+      <div style={{
+        position:"fixed", top:0, left:0, right:0, height:4, zIndex:200,
+        background:RAINBOW, backgroundSize:"200% auto",
+        animation:"rainbow-shift 4s linear infinite",
+      }}/>
+
       {/* Header */}
-      <header style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, display:"flex", alignItems:"center", justifyContent:"space-between", padding:isMobile?"12px 16px":"14px 28px", background:"rgba(8,8,8,0.95)", borderBottom:"1px solid var(--border)", backdropFilter:"blur(12px)" }}>
+      <header style={{ position:"fixed", top:4, left:0, right:0, zIndex:100, display:"flex", alignItems:"center", justifyContent:"space-between", padding:isMobile?"12px 16px":"14px 28px", background:"rgba(8,8,8,0.95)", borderBottom:"1px solid var(--border)", backdropFilter:"blur(12px)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <img src="/logo.png" alt="" style={{ width:isMobile?28:34, height:isMobile?28:34, objectFit:"cover", borderRadius:4 }}/>
           <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:isMobile?15:20, letterSpacing:"0.12em", color:"var(--white)", lineHeight:1 }}>LAST BUYER WINS</div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:isMobile?12:28 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:isMobile?12:20 }}>
           {!isMobile && [["HOME",()=>navigate("home")],["HISTORY",()=>navigate("history")]].map(([l,fn]) => (
-            <button key={l} onClick={fn} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:3, color:l==="HISTORY"?"var(--green)":"var(--grey)", transition:"color 0.2s" }}>{l}</button>
+            <button key={l} onClick={fn} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:11, fontWeight:700, letterSpacing:3, color:l==="HISTORY"?"#BF5FFF":"var(--grey)", transition:"color 0.2s" }}>{l}</button>
           ))}
+
           {isMobile && (
             <button onClick={() => setMenuOpen(o=>!o)} style={{ background:"none", border:"1px solid var(--border)", borderRadius:3, cursor:"pointer", color:"var(--grey)", padding:"5px 10px", fontSize:13 }}>{menuOpen?"✕":"☰"}</button>
           )}
@@ -118,14 +127,14 @@ export default function History({ navigate }) {
       </header>
 
       {menuOpen && (
-        <div style={{ position:"fixed", top:53, left:0, right:0, background:"var(--bg2)", borderBottom:"1px solid var(--border)", zIndex:99, padding:"12px 16px 20px" }}>
+        <div style={{ position:"fixed", top:57, left:0, right:0, background:"var(--bg2)", borderBottom:"1px solid var(--border)", zIndex:99, padding:"12px 16px 20px" }}>
           {[["HOME",()=>{navigate("home");setMenuOpen(false);}],["HISTORY",()=>{navigate("history");setMenuOpen(false);}]].map(([l,fn]) => (
             <button key={l} onClick={fn} style={{ display:"block", width:"100%", background:"none", border:"none", cursor:"pointer", fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:700, letterSpacing:3, color:"var(--grey)", textAlign:"left", padding:"12px 0", borderBottom:"1px solid var(--border)" }}>{l}</button>
           ))}
         </div>
       )}
 
-      <div style={{ marginTop:isMobile?53:63, flex:1, padding:isMobile?"24px 16px 60px":"40px 24px 80px", maxWidth:"var(--max-w)", margin:`${isMobile?53:63}px auto 0`, width:"100%" }}>
+      <div style={{ marginTop:isMobile?57:67, flex:1, padding:isMobile?"24px 16px 60px":"40px 24px 80px", maxWidth:"var(--max-w)", margin:`${isMobile?57:67}px auto 0`, width:"100%" }}>
 
         {/* Page title */}
         <div style={{ marginBottom:24 }}>
@@ -171,53 +180,89 @@ export default function History({ navigate }) {
           ) : (
             <div style={{ display:"flex", flexDirection:"column", gap:1, border:"1px solid var(--border)", borderRadius:4, overflow:"hidden" }}>
               {rounds.map((round, ri) => {
-                const isOpen     = expanded === round.id;
-                const topWinner  = round.winners?.[0];
+                const isOpen    = expanded === round.id;
+                const topWinner = round.winners?.[0];
                 return (
                   <div key={round.id} style={{ borderBottom:ri<rounds.length-1?"1px solid var(--border)":"none" }}>
                     <div
                       onClick={() => setExpanded(isOpen ? null : round.id)}
-                      style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, padding:isMobile?"12px 14px":"16px 22px", background:isOpen?"rgba(57,255,20,0.04)":ri%2===0?"var(--bg2)":"var(--bg3)", cursor:"pointer", flexWrap:isMobile?"wrap":"nowrap", borderLeft:isOpen?"2px solid var(--green)":"2px solid transparent", transition:"all 0.2s" }}
-                      onMouseEnter={e => { if(!isOpen) e.currentTarget.style.background="rgba(57,255,20,0.02)"; }}
+                      style={{
+                        display:"flex", alignItems:"center", justifyContent:"space-between", gap:12,
+                        padding:isMobile?"12px 14px":"16px 22px",
+                        background:isOpen?"rgba(191,95,255,0.04)":ri%2===0?"var(--bg2)":"var(--bg3)",
+                        cursor:"pointer", flexWrap:isMobile?"wrap":"nowrap",
+                        borderLeft:isOpen?"2px solid #BF5FFF":"2px solid transparent",
+                        transition:"all 0.2s",
+                      }}
+                      onMouseEnter={e => { if(!isOpen) e.currentTarget.style.background="rgba(191,95,255,0.02)"; }}
                       onMouseLeave={e => { if(!isOpen) e.currentTarget.style.background=ri%2===0?"var(--bg2)":"var(--bg3)"; }}
                     >
                       <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
-                        <div style={{ width:32, height:32, borderRadius:"50%", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", background:isOpen?"var(--green)":"rgba(255,255,255,0.05)", fontFamily:"'Space Mono',monospace", fontSize:10, fontWeight:700, color:isOpen?"#000":"var(--grey-dim)" }}>{round.round}</div>
+                        {/* Round number circle */}
+                        <div style={{
+                          width:32, height:32, borderRadius:"50%", flexShrink:0,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          background: isOpen
+                            ? "linear-gradient(135deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF)"
+                            : "rgba(255,255,255,0.05)",
+                          backgroundSize: isOpen ? "200% auto" : undefined,
+                          animation: isOpen ? "rainbow-shift 3s linear infinite" : "none",
+                          fontFamily:"'Space Mono',monospace", fontSize:10, fontWeight:700,
+                          color:isOpen?"#000":"var(--grey-dim)",
+                        }}>{round.round}</div>
                         <div>
-                          <WalletCell wallet={topWinner?.wallet} fontSize={isMobile?10:12} color={isOpen?"var(--green)":"var(--white)"}/>
+                          <WalletCell wallet={topWinner?.wallet} fontSize={isMobile?10:12} color={isOpen?"#BF5FFF":"var(--white)"}/>
                           {round.numWinners > 1 && <span style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey)", marginLeft:4 }}>+{round.numWinners-1} more</span>}
                           <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", marginTop:2 }}>{fmtDate(round.timestamp)}</div>
                         </div>
                       </div>
                       <div style={{ display:"flex", alignItems:"center", gap:isMobile?14:24, flexShrink:0 }}>
                         <div style={{ textAlign:"right" }}>
-                          <div style={{ fontFamily:"'Space Mono',monospace", fontSize:isMobile?13:15, color:"var(--green)", fontWeight:700 }}>◎ {fmtSOL(round.pot)}</div>
+                          <div style={{ fontFamily:"'Space Mono',monospace", fontSize:isMobile?13:15, color:"#BF5FFF", fontWeight:700 }}>◎ {fmtSOL(round.pot)}</div>
                           <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", marginTop:2 }}>{round.numWinners} winner{round.numWinners>1?"s":""}</div>
                         </div>
-                        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:14, color:isOpen?"var(--green)":"var(--grey-dim)", transition:"color 0.2s" }}>{isOpen?"▲":"▼"}</div>
+                        <div style={{ fontFamily:"'Inter',sans-serif", fontSize:14, color:isOpen?"#BF5FFF":"var(--grey-dim)", transition:"color 0.2s" }}>{isOpen?"▲":"▼"}</div>
                       </div>
                     </div>
 
                     {isOpen && round.winners && (
-                      <div style={{ padding:isMobile?"12px 14px":"16px 22px", background:"rgba(57,255,20,0.02)", borderTop:"1px solid rgba(57,255,20,0.08)", animation:"slide-up 0.25s ease" }}>
+                      <div style={{ padding:isMobile?"12px 14px":"16px 22px", background:"rgba(191,95,255,0.02)", borderTop:"1px solid rgba(191,95,255,0.1)", animation:"slide-up 0.25s ease" }}>
                         <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, fontWeight:700, letterSpacing:4, color:"var(--grey)", marginBottom:12 }}>WINNERS BREAKDOWN</div>
                         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                           {round.winners.map((w, wi) => (
-                            <div key={wi} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, padding:"10px 14px", background:wi===0?"rgba(57,255,20,0.06)":"rgba(255,255,255,0.02)", borderRadius:3, border:wi===0?"1px solid rgba(57,255,20,0.2)":"1px solid rgba(255,255,255,0.04)", flexWrap:"wrap" }}>
+                            <div key={wi} style={{
+                              display:"flex", alignItems:"center", justifyContent:"space-between", gap:12,
+                              padding:"10px 14px",
+                              background:wi===0?"rgba(191,95,255,0.06)":"rgba(255,255,255,0.02)",
+                              borderRadius:3,
+                              border:wi===0?"1px solid rgba(191,95,255,0.25)":"1px solid rgba(255,255,255,0.04)",
+                              flexWrap:"wrap",
+                            }}>
                               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                                <div style={{ width:24, height:24, borderRadius:"50%", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center", background:wi===0?"var(--green)":"rgba(255,255,255,0.05)", fontFamily:"'Space Mono',monospace", fontSize:9, fontWeight:700, color:wi===0?"#000":"var(--grey-dim)", boxShadow:wi===0?"0 0 10px var(--green-glow)":"none" }}>
+                                <div style={{
+                                  width:24, height:24, borderRadius:"50%", flexShrink:0,
+                                  display:"flex", alignItems:"center", justifyContent:"center",
+                                  background: wi===0
+                                    ? "linear-gradient(135deg,#FF3366,#FF8C00,#FFD700,#39FF14,#00B4FF,#BF5FFF)"
+                                    : "rgba(255,255,255,0.05)",
+                                  backgroundSize: wi===0 ? "200% auto" : undefined,
+                                  animation: wi===0 ? "rainbow-shift 3s linear infinite" : "none",
+                                  fontFamily:"'Space Mono',monospace", fontSize:9, fontWeight:700,
+                                  color:wi===0?"#000":"var(--grey-dim)",
+                                  boxShadow:wi===0?"0 0 12px rgba(191,95,255,0.4)":"none",
+                                }}>
                                   {wi===0?"★":wi+1}
                                 </div>
                                 <div>
-                                  <WalletCell wallet={w.wallet} fontSize={isMobile?10:12} color={wi===0?"var(--green)":"var(--white)"}/>
+                                  <WalletCell wallet={w.wallet} fontSize={isMobile?10:12} color={wi===0?"#BF5FFF":"var(--white)"}/>
                                   {w.txSig && (
                                     <a href={`https://solscan.io/tx/${w.txSig}`} target="_blank" rel="noreferrer" style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", textDecoration:"underline" }}>TX ↗</a>
                                   )}
                                 </div>
                               </div>
                               <div style={{ textAlign:"right" }}>
-                                <div style={{ fontFamily:"'Space Mono',monospace", fontSize:isMobile?12:14, color:wi===0?"var(--green)":"var(--white)", fontWeight:700 }}>◎ {fmtSOL(w.payout)}</div>
-                                <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", marginTop:2 }}>{wi===0?"50%":`split`} of pot</div>
+                                <div style={{ fontFamily:"'Space Mono',monospace", fontSize:isMobile?12:14, color:wi===0?"#BF5FFF":"var(--white)", fontWeight:700 }}>◎ {fmtSOL(w.payout)}</div>
+                                <div style={{ fontFamily:"'Inter',sans-serif", fontSize:9, color:"var(--grey-dim)", marginTop:2 }}>{wi===0?"50%":"split"} of pot</div>
                               </div>
                             </div>
                           ))}
@@ -257,7 +302,7 @@ export default function History({ navigate }) {
                           <div style={{ marginTop:10, display:"flex", flexDirection:"column", gap:4 }}>
                             <div>
                               <div style={{ fontFamily:"'Inter',sans-serif", fontSize:8, letterSpacing:3, color:"var(--grey-dim)" }}>TOTAL WON</div>
-                              <div style={{ fontFamily:"'Space Mono',monospace", fontSize:18, color:"var(--green)", fontWeight:700 }}>◎ {fmtSOL(entry.totalSol)}</div>
+                              <div style={{ fontFamily:"'Space Mono',monospace", fontSize:18, color:"#BF5FFF", fontWeight:700 }}>◎ {fmtSOL(entry.totalSol)}</div>
                             </div>
                             <div style={{ display:"flex", gap:16, marginTop:4 }}>
                               <div>
@@ -283,7 +328,6 @@ export default function History({ navigate }) {
                 {/* Full table */}
                 {hallOfFame.length > 3 && (
                   <div style={{ border:"1px solid var(--border)", borderRadius:4, overflow:"hidden" }}>
-                    {/* Header */}
                     <div style={{ display:"grid", gridTemplateColumns:isMobile?"28px 1fr 80px 70px":"28px 1fr 110px 90px 90px 80px", gap:isMobile?8:12, padding:isMobile?"8px 14px":"10px 20px", background:"var(--bg3)", borderBottom:"1px solid var(--border)" }}>
                       {["#","WALLET","TOTAL WON",...(isMobile?["1ST"]:["1ST PLACE","APPEARANCES","BEST WIN"])].map((h,i) => (
                         <div key={i} style={{ fontFamily:"'Inter',sans-serif", fontSize:8, fontWeight:700, letterSpacing:3, color:"var(--grey-dim)", textAlign:i>1?"right":"left" }}>{h}</div>
@@ -293,7 +337,7 @@ export default function History({ navigate }) {
                       <div key={entry.wallet} style={{ display:"grid", gridTemplateColumns:isMobile?"28px 1fr 80px 70px":"28px 1fr 110px 90px 90px 80px", gap:isMobile?8:12, alignItems:"center", padding:isMobile?"10px 14px":"12px 20px", background:i%2===0?"var(--bg2)":"var(--bg3)", borderBottom:"1px solid rgba(255,255,255,0.03)", animation:"fade-in 0.3s ease" }}>
                         <div style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--grey-dim)", fontWeight:700 }}>{i+4}</div>
                         <WalletCell wallet={entry.wallet} fontSize={isMobile?10:12}/>
-                        <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:isMobile?11:13, color:"var(--green)", fontWeight:700 }}>◎{fmtSOL(entry.totalSol)}</div>
+                        <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:isMobile?11:13, color:"#BF5FFF", fontWeight:700 }}>◎{fmtSOL(entry.totalSol)}</div>
                         <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:isMobile?10:12, color:"var(--white)" }}>{entry.firstWins}x</div>
                         {!isMobile && <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:12, color:"var(--grey)" }}>{entry.appearances}x</div>}
                         {!isMobile && <div style={{ textAlign:"right", fontFamily:"'Space Mono',monospace", fontSize:12, color:"var(--grey)" }}>◎{fmtSOL(entry.biggest)}</div>}
@@ -312,7 +356,9 @@ export default function History({ navigate }) {
       </div>
 
       <footer style={{ borderTop:"1px solid var(--border)", padding:"18px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <div style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--grey-dim)" }}>LAST BUYER WINS — ON SOLANA</div>
+        <div style={{ fontFamily:"'Space Mono',monospace", fontSize:10, color:"var(--grey-dim)" }}>
+          LAST BUYER WINS — ON SOLANA
+        </div>
         <button onClick={() => navigate("home")} className="btn btn-outline" style={{ fontSize:10, padding:"8px 18px" }}>← BACK TO GAME</button>
       </footer>
     </div>
