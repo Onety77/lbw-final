@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global stats + leaderboard — public read, engine writes via Admin SDK
+    match /lbw_stats/{doc} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // Round history — public read, engine writes
+    match /lbw_history/{doc} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
