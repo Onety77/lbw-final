@@ -97,7 +97,7 @@ function RulesModal({ onClose, minBuy }) {
     },
     {
       n:"04", title:"WINNERS & PAYOUTS",
-      body:"When the timer hits zero, payouts fire automatically on-chain. Position #1 (last buyer) receives 50% of the pot. Positions #2 through #5 split the remaining 50% equally. Everything is verifiable on Solscan.",
+      body:"When the timer hits zero, 80% of the pot is paid out automatically on-chain. Position #1 (last buyer) receives 50% of that. Positions #2 through #5 split the remaining 50% equally. The other 20% rolls over and seeds the next round — so there is always something in the pot. Everything is verifiable on Solscan.",
     },
   ];
 
@@ -398,7 +398,7 @@ export default function Home({ navigate }) {
     localStorage.setItem("lbw_watch", val);
   };
 
-  const currentPot     = stats?.currentPotSOL ?? null;
+  const currentPot     = stats?.payablePotSOL ?? null;
   const leaderboard    = (stats?.leaderboard || [])
     .filter(e => !blacklist.has(e.wallet.toLowerCase()))
     .map((e, i, arr) => ({

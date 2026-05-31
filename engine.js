@@ -28,6 +28,7 @@ const TIMER_MS_MIN        = parseInt(process.env.TIMER_MS_MIN       || "10000");
 const TIMER_STEP_MS       = parseInt(process.env.TIMER_STEP_MS      || "5000");   // ms removed per minute
 const MAX_HOLDER_PCT      = parseFloat(process.env.MAX_HOLDER_PCT   || "3.5");
 const SPLIT_THRESHOLD     = parseFloat(process.env.SPLIT_THRESHOLD  || "1.0");
+const ROLLOVER_PCT        = parseFloat(process.env.ROLLOVER_PCT     || "0.20"); // 20% rolls to next round
 const POLL_MS             = 3000;
 
 // Market-cap tiers — configurable via env, defaults match user spec
@@ -268,11 +269,13 @@ async function runQueue() {
 
 // ── FIRESTORE PUSH ────────────────────────────────────────────────────────────
 async function pushState(potSOL) {
-  const withShares     = calculateShares(leaderboard, potSOL);
+  const payablePot     = Math.round(potSOL * (1 - ROLLOVER_PCT) * 1e6) / 1e6;
+  const withShares     = calculateShares(leaderboard, payablePot);
   const resetMs        = getResetMs();
   const roundElapsedMs = Math.floor(Date.now() - roundStartTime);
   await db.doc("lbw_stats/global").set({
     currentPotSOL:     potSOL,
+    payablePotSOL:     payablePot,
     splitThreshold:    SPLIT_THRESHOLD,
     currentMinBuySol,
     currentResetMs:    resetMs,
@@ -352,18 +355,18 @@ async function triggerPayout() {
 
   try {
     const balSOL   = await getWalletBalance();
-    let sendSOLAmt = balSOL - GAS_RESERVE_SOL;
+    let sendSOLAmt = (balSOL - GAS_RESERVE_SOL) * (1 - ROLLOVER_PCT);
 
     if (sendSOLAmt <= 0) {
       log("Pot empty — waiting 30s...");
       await sleep(30000);
-      sendSOLAmt = (await getWalletBalance()) - GAS_RESERVE_SOL;
+      sendSOLAmt = ((await getWalletBalance()) - GAS_RESERVE_SOL) * (1 - ROLLOVER_PCT);
       if (sendSOLAmt <= 0) { log("Still empty — new round."); await startNewRound(); isPayingOut = false; return; }
     }
 
     const sendLam  = Math.floor(sendSOLAmt * LAMPORTS_PER_SOL);
     const useSplit = sendSOLAmt >= SPLIT_THRESHOLD && n > 1;
-    log(`Pot: ◎${sendSOLAmt.toFixed(6)} | Split: ${useSplit ? `YES (${n} winners)` : "NO (last buyer takes all)"}`);
+    log(`Paying out ◎${sendSOLAmt.toFixed(6)} (${((1-ROLLOVER_PCT)*100).toFixed(0)}% of pot) | Split: ${useSplit ? `YES (${n} winners)` : "NO (last buyer takes all)"}`);
 
     const payouts = snapshot.map((e, i) => {
       let lam;
@@ -439,7 +442,9 @@ async function startNewRound() {
   const bal = await getWalletBalance().catch(() => 0);
   const pot = Math.max(0, bal - GAS_RESERVE_SOL);
   await db.doc("lbw_stats/global").set({
-    currentPotSOL: pot, leaderboard: [],
+    currentPotSOL: pot,
+    payablePotSOL: Math.round(pot * (1 - ROLLOVER_PCT) * 1e6) / 1e6,
+    leaderboard: [],
     lastBuyer: null, lastBuyAt: null, lastBuySOL: null,
     nextWinAt:         Timestamp.fromMillis(Date.now() + TIMER_MS_MAX),
     currentResetMs:    TIMER_MS_MAX,
@@ -536,7 +541,10 @@ async function balanceLoop() {
     try {
       const bal = await getWalletBalance();
       const pot = Math.max(0, bal - GAS_RESERVE_SOL);
-      await db.doc("lbw_stats/global").set({ currentPotSOL: pot }, { merge: true });
+      await db.doc("lbw_stats/global").set({
+        currentPotSOL: pot,
+        payablePotSOL: Math.round(pot * (1 - ROLLOVER_PCT) * 1e6) / 1e6,
+      }, { merge: true });
     } catch {}
   }
 }
@@ -549,6 +557,7 @@ log(`Timer          : ${TIMER_MS_MAX/1000}s max → ${TIMER_MS_MIN/1000}s floor 
 log(`Min Buy Tiers  : ◎${MC_TIERS[0].minBuySol} (<$35k) | ◎${MC_TIERS[1].minBuySol} (<$100k) | ◎${MC_TIERS[2].minBuySol} ($100k+)`);
 log(`Gas Reserve    : ◎${GAS_RESERVE_SOL}`);
 log(`Split Threshold: ◎${SPLIT_THRESHOLD}`);
+log(`Rollover       : ${(ROLLOVER_PCT*100).toFixed(0)}% kept each round`);
 log(`Max Holding    : ${MAX_HOLDER_PCT}%`);
 log("─".repeat(50));
 
