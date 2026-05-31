@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { doc, onSnapshot, collection, query, orderBy, limit } from "firebase/firestore";
 import { db } from "../firebase";
 
-const TOKEN_CA = "87oG6xRvgJfwbxB4sZAAcYewFozT5w6abX5wFCirpump";
+const TOKEN_CA = "ndLZkX7x11TGGSxjBmVHX2iU3BpLajnMWbgYxw2pump";
 const PUMP_URL = "https://pump.fun/coin/" + TOKEN_CA;
 const X_URL    = "https://https://x.com/lastbuyerwins26";
 
